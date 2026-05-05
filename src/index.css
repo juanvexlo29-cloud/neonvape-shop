@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark: #0B0F19;
+  --color-neonGreen: #10b981;
+  --color-neonPurple: #9333ea;
+}
+
+body {
+  background-color: var(--color-dark);
+  color: white;
+  margin: 0;
+  overflow-x: hidden; /* Cierra el paso a cualquier elemento que se salga por los lados */
+}
+
+/* === ANIMACIÓN DE LA BARRA (MARQUEE) === */
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  /* Se mueve al -50% porque duplicamos el contenido para que el ciclo sea infinito y sin cortes */
+  100% { transform: translateX(-50%); } 
+}
+
+.animate-marquee-infinite {
+  animation: scroll-left 25s linear infinite;
+  display: flex;
+  width: max-content; /* Obliga a que tome todo el ancho de los elementos */
+}
+
+/* Pausar la animación si el usuario pone el mouse encima (Opcional pero muy pro) */
+.animate-marquee-infinite:hover {
+  animation-play-state: paused;
+}
+
+/* === ANIMACIÓN DEL CAMIÓN (VISTA BENEFICIOS) === */
+@keyframes drive-to-home {
+  0% { left: -10%; opacity: 0; }
+  15% { opacity: 1; }
+  65% { left: calc(100% - 90px); opacity: 1; transform: scale(1); }
+  75% { left: calc(100% - 70px); opacity: 0; transform: scale(0.8); }
+  100% { left: 100%; opacity: 0; }
+}
+
+.animate-drive-to-home {
+  animation: drive-to-home 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
