@@ -1,92 +1,139 @@
-import { Star, Eye, ShoppingBag } from 'lucide-react';
+﻿import { Star, Eye, ShoppingBag, Heart, XCircle } from 'lucide-react';
+import PropTypes from 'prop-types';
 
-export default function ProductCard({ product, onAddToCart, onViewProduct }) {
-  // Función para determinar el color del badge
-  const getBadgeColor = (badge) => {
-    if (badge === 'PREMIUM') return 'bg-blue-600';
-    if (badge === 'POCO STOCK') return 'bg-neonRed'; // Usando nuestra variable neonRed
-    if (badge === 'NUEVO') return 'bg-neonPurple';
-    if (badge === 'TOP VENTAS') return 'bg-orange-500';
-    return 'bg-gray-600';
-  };
+export default function ProductCard({ product, onAddToCart, onViewProduct, isFavorite, onToggleFavorite }) {
+  if (!product) return null;
+
+  // ── 1. EXTRAER LA IMAGEN PRINCIPAL (ARRAY O TEXTO) ──
+  const mainImage = Array.isArray(product.image_url)
+    ? product.image_url[0]
+    : product.image_url;
+
+  // ── 2. CÁLCULO DE STOCK TOTAL (COMPATIBLE CON JSONB Y DATOS VIEJOS) ──
+  const parsedFlavors = Array.isArray(product?.flavors) 
+    ? product.flavors.map(f => typeof f === 'string' ? { name: f, stock: 10 } : f)
+    : [{ name: product?.flavor || 'Edición Especial', stock: 10 }];
+
+  const totalStock = parsedFlavors.reduce((acc, f) => acc + (f.stock || 0), 0);
+  const isOutOfStock = totalStock === 0;
 
   return (
-    <div className="bg-[#111625] rounded-2xl p-5 border border-gray-800 hover:border-neonGreen/50 transition-all group relative overflow-hidden flex flex-col h-full animate-fade-in">
+    <div className={`group relative flex flex-col h-full overflow-hidden rounded-2xl border border-white/5 bg-white/2 p-6 transition-all duration-500 ${
+      isOutOfStock ? 'opacity-80' : 'hover:bg-white/5 hover:border-phoenix-gold/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)]'
+    }`}>
       
-      {/* Badge Dinámico (Top Izquierda como en la imagen) */}
-      {product.badge && (
-        <span className={`absolute top-4 left-4 z-10 text-[10px] font-bold px-3 py-1.5 rounded-full text-white tracking-wider ${getBadgeColor(product.badge)}`}>
+      {/* ── BOTÓN DE FAVORITOS ── */}
+      <button 
+        onClick={(e) => { 
+          e.stopPropagation(); 
+          if(onToggleFavorite) onToggleFavorite(product); 
+        }}
+        className="absolute top-4 right-4 z-20 p-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 transition-all duration-300 hover:scale-110 active:scale-90 hover:bg-black/60"
+        aria-label="Alternar Favorito"
+      >
+        <Heart 
+          size={18} 
+          className={`transition-all duration-300 ${
+            isFavorite 
+              ? 'fill-red-500 text-red-500 scale-110 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]' 
+              : 'text-white/40 group-hover:text-white/80'
+          }`} 
+        />
+      </button>
+
+      {/* ── BADGE (AGOTADO O PREMIUM) ── */}
+      {isOutOfStock ? (
+        <span className="absolute top-4 left-4 z-20 bg-red-500/80 text-white border border-red-500/30 px-3 py-1 rounded-full text-[8px] uppercase tracking-[0.2em] font-black backdrop-blur-md shadow-lg">
+          Agotado
+        </span>
+      ) : product.badge ? (
+        <span className="absolute top-4 left-4 z-20 bg-black/60 text-phoenix-gold border border-phoenix-gold/30 px-3 py-1 rounded-full text-[8px] uppercase tracking-[0.2em] font-black backdrop-blur-md">
           {product.badge}
         </span>
-      )}
+      ) : null}
 
-      {/* Imagen con Resplandor (Glow) IDÉNTICO A LA IMAGEN */}
-      {/* Añadido onClick y cursor-pointer para ir al detalle */}
+      {/* ── IMAGEN DEL VAPORIZADOR CON LÓGICA DE AGOTADO ── */}
       <div 
         onClick={() => onViewProduct(product)}
-        className="relative h-60 mb-5 rounded-xl flex justify-center items-center overflow-hidden bg-black/20 cursor-pointer"
+        className="relative h-56 mb-6 rounded-xl flex justify-center items-center overflow-hidden bg-black/40 cursor-pointer border border-white/5 mt-4"
       >
-        {/* Efecto Glow de fondo basado en el color del producto */}
-        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-linear-to-tr ${product.color} opacity-20 filter blur-2xl group-hover:opacity-40 transition-opacity`}></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-linear-to-tr ${product.color || 'from-gray-700 to-gray-500'} opacity-10 filter blur-2xl transition-opacity duration-500 ${!isOutOfStock && 'group-hover:opacity-30'}`}></div>
         
-        {/* Representación del Vape con el degradado exacto */}
-        <div className={`relative z-10 w-10 h-44 bg-linear-to-b ${product.color} rounded-md shadow-2xl`}>
-            {/* Detalles del vaporizador */}
-            <div className="w-full h-8 bg-black/40 rounded-t-md border-b border-white/10"></div>
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-4 h-1 bg-white/50 rounded-full"></div>
-        </div>
+        {mainImage ? (
+          <img 
+            src={mainImage} 
+            alt={product.name}
+            className={`relative z-10 w-auto h-48 object-contain transition-transform duration-500 drop-shadow-[0_0_15px_rgba(255,255,255,0.05)] ${
+              isOutOfStock 
+                ? 'opacity-40 grayscale' 
+                : 'group-hover:scale-105'
+            }`}
+          />
+        ) : (
+          <div className={`relative z-10 w-12 h-44 bg-linear-to-b ${product.color || 'from-gray-500 to-gray-800'} rounded-md shadow-2xl transition-transform duration-500 ${isOutOfStock ? 'opacity-40 grayscale' : 'group-hover:scale-105'}`}>
+              <div className="w-full h-8 bg-black/60 rounded-t-md border-b border-white/10"></div>
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-4 h-1 bg-white/40 rounded-full"></div>
+          </div>
+        )}
       </div>
       
-      {/* Información del Producto */}
-      <div className="grow flex flex-col mt-2 space-y-1.5">
+      {/* ── INFORMACIÓN DEL PRODUCTO ── */}
+      <div className="grow flex flex-col space-y-2">
         
-        {/* Puffs y Nicotina (Arriba del título, pequeños como en la imagen) */}
-        <div className="flex justify-between text-[11px] text-gray-400 font-medium">
-          <span className="text-neonGreen font-bold">{product.puffs.toLocaleString()} puffs</span>
-          <span>Nicotina {product.nicotine}</span>
+        <div className="flex justify-between text-[10px] uppercase tracking-widest text-white/50 font-bold">
+          <span className={isOutOfStock ? 'text-white/30' : 'text-phoenix-gold'}>
+            {product.puffs?.toLocaleString() || '7500'} puffs
+          </span>
+          <span>Nic {product.nicotine || '5%'}</span>
         </div>
         
-        {/* Nombre Grande */}
-        {/* Añadido onClick, cursor-pointer y hover para ir al detalle */}
         <h3 
           onClick={() => onViewProduct(product)}
-          className="text-white font-black text-2xl leading-tight tracking-tight cursor-pointer hover:text-neonGreen transition-colors"
+          className={`text-2xl leading-tight tracking-tight cursor-pointer transition-colors mt-1 ${isOutOfStock ? 'text-white/50' : 'text-white hover:text-phoenix-gold'}`}
+          style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
         >
-          {product.name}
+          {product.name || 'Vaporizador Premium'}
         </h3>
         
-        {/* Sabor */}
-        <p className="text-gray-500 text-sm italic">{product.flavor}</p>
+        <p className="text-white/40 text-xs italic font-light">
+          {product.flavor || 'Edición Especial'}
+        </p>
         
-        {/* Estrellas y Valoración (Debajo del título como en la imagen) */}
-        <div className="flex items-center text-yellow-500 text-sm gap-1 pb-4">
-          <Star size={14} fill="currentColor" /> 
-          <Star size={14} fill="currentColor" /> 
-          <Star size={14} fill="currentColor" /> 
-          <Star size={14} fill="currentColor" /> 
-          <Star size={14} fill="currentColor" className="opacity-50" /> 
-          <span className="text-gray-400 ml-1 text-xs">{product.rating}</span>
+        {/* Estrellas Doradas */}
+        <div className={`flex items-center text-sm gap-1 pt-1 pb-4 ${isOutOfStock ? 'text-white/20' : 'text-phoenix-gold'}`}>
+          <Star size={12} fill="currentColor" /> 
+          <Star size={12} fill="currentColor" /> 
+          <Star size={12} fill="currentColor" /> 
+          <Star size={12} fill="currentColor" /> 
+          <Star size={12} fill="currentColor" className="opacity-40" /> 
+          <span className="text-white/40 ml-2 text-[10px] font-bold">{product.rating || '4.9'}</span>
         </div>
         
-        {/* Footer de la tarjeta con Precio Grande en COP */}
-        <div className="mt-auto flex justify-between items-center pt-4 border-t border-gray-800">
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-neonGreen to-white font-black text-2xl tracking-tight">
-            $ {product.price.toLocaleString('es-CO')}
+        {/* ── FOOTER DE TARJETA (PRECIO Y BOTONES) ── */}
+        <div className="mt-auto flex justify-between items-center pt-5 border-t border-white/5">
+          <span className={`font-serif text-2xl tracking-tight ${isOutOfStock ? 'text-white/30' : 'text-phoenix-gold'}`}>
+            ${product.price?.toLocaleString('es-CO') || '0'}
           </span>
           
-          {/* Botones de Acción Modificados (Ver Detalle y Añadir al Carro) */}
           <div className="flex gap-2">
             <button 
-              onClick={() => onViewProduct(product)}
-              className="flex items-center gap-1.5 bg-gray-800/80 hover:bg-white hover:text-black text-white px-4 py-2 rounded-xl text-xs font-bold transition-all group-hover:scale-105"
+              onClick={(e) => { e.stopPropagation(); onViewProduct(product); }}
+              className="flex items-center justify-center w-10 h-10 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all hover:scale-105"
+              aria-label="Ver detalles"
             >
-              <Eye size={16} /> Ver
+              <Eye size={16} />
             </button>
             <button 
-              onClick={() => onAddToCart(product)}
-              className="bg-neonGreen hover:bg-emerald-400 text-black p-2 rounded-xl transition-colors shadow-[0_0_10px_rgba(16,185,129,0.2)] hover:scale-105"
+              disabled={isOutOfStock}
+              onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
+              className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all ${
+                isOutOfStock 
+                  ? 'bg-white/5 border border-white/5 text-white/20 cursor-not-allowed' 
+                  : 'bg-phoenix-gold hover:bg-[#F3E5AB] text-black shadow-[0_0_15px_rgba(212,175,55,0.2)] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-105'
+              }`}
+              aria-label={isOutOfStock ? "Producto Agotado" : "Añadir al carrito"}
             >
-              <ShoppingBag size={18} />
+              {isOutOfStock ? <XCircle size={16} /> : <ShoppingBag size={16} />}
             </button>
           </div>
         </div>
@@ -94,3 +141,29 @@ export default function ProductCard({ product, onAddToCart, onViewProduct }) {
     </div>
   );
 }
+
+ProductCard.propTypes = {
+  product: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    name: PropTypes.string.isRequired,
+    flavor: PropTypes.string,
+    flavors: PropTypes.oneOfType([
+      PropTypes.arrayOf(PropTypes.string),
+      PropTypes.array // Soporte para JSONB
+    ]),
+    badge: PropTypes.string,
+    rating: PropTypes.number,
+    price: PropTypes.number.isRequired,
+    puffs: PropTypes.number,
+    nicotine: PropTypes.string,
+    color: PropTypes.string,
+    image_url: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.arrayOf(PropTypes.string)
+    ]),
+  }).isRequired,
+  onAddToCart: PropTypes.func.isRequired,
+  onViewProduct: PropTypes.func.isRequired,
+  isFavorite: PropTypes.bool,
+  onToggleFavorite: PropTypes.func
+};

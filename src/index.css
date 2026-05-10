@@ -1,16 +1,27 @@
 @import "tailwindcss";
 
 @theme {
+  /* Colores exclusivos de Phoenix Vape Shop */
+  --color-phoenix-gold: #D4AF37;
+  --color-phoenix-gold-light: #F3E5AB;
+  --color-phoenix-gold-dark: #AA882E;
+  --color-phoenix-light: #FAFAFA; /* Un blanco roto muy elegante */
+  --color-phoenix-dark: #1A1A1A;  /* Para textos, no es 100% negro */
+  --color-phoenix-gray: #737373;
+
+  /* Colores NeonVape (Conservados temporalmente) */
   --color-dark: #0B0F19;
   --color-neonGreen: #10b981;
   --color-neonPurple: #9333ea;
 }
 
 body {
-  background-color: var(--color-dark);
-  color: white;
+  /* Cambiamos el fondo general al estilo elegante y claro */
+  background-color: var(--color-phoenix-light);
+  color: var(--color-phoenix-dark);
   margin: 0;
   overflow-x: hidden; /* Cierra el paso a cualquier elemento que se salga por los lados */
+  font-family: 'Montserrat', system-ui, sans-serif; /* Tipografía más limpia */
 }
 
 /* === ANIMACIÓN DE LA BARRA (MARQUEE) === */
@@ -26,7 +37,7 @@ body {
   width: max-content; /* Obliga a que tome todo el ancho de los elementos */
 }
 
-/* Pausar la animación si el usuario pone el mouse encima (Opcional pero muy pro) */
+/* Pausar la animación si el usuario pone el mouse encima */
 .animate-marquee-infinite:hover {
   animation-play-state: paused;
 }

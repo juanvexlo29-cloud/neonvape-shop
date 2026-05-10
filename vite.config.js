@@ -8,6 +8,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  // ESTA ES LA LÍNEA CLAVE:
+  // Base path para que GitHub Pages encuentre tus archivos
   base: '/neonvape-shop/', 
 })

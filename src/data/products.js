@@ -1,4 +1,4 @@
-// src/data/products.js - Base de datos de la colección 2026
+﻿// src/data/products.js - Base de datos de la colección 2026
 
 export const PRODUCTS = [
   {

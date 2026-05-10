@@ -7,24 +7,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Azul oscuro casi negro para el fondo, idéntico al video
-        dark: "#0B0F19",
-        // Verde neón característico
-        neonGreen: "#10b981",
-        // Morado profundo para detalles
-        neonPurple: "#9333ea",
-        // Rojo para alertas
-        neonRed: "#ef4444",
+        // Fondo ultra oscuro de Fénix
+        dark: "#030308",
+        // Dorado oficial de la marca
+        'phoenix-gold': "#D4AF37",
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+        // Añadimos la fuente elegante para los títulos
+        serif: ['"Cormorant Garamond"', 'Georgia', 'serif'],
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
-        // Animación para que la cinta se mueva suavemente
         marquee: {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-100%)' },
