@@ -6,13 +6,19 @@ export default function SearchOverlay({ isOpen, onClose, products, onViewProduct
 
   if (!isOpen) return null;
 
-  const results = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.flavor.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const results = products.filter(p => {
+    const term = searchTerm.toLowerCase();
+    const nameMatch = p.name && p.name.toLowerCase().includes(term);
+    
+    const flavorMatch = p.flavors && Array.isArray(p.flavors) && p.flavors.some(f => 
+      f.name && f.name.toLowerCase().includes(term)
+    );
+
+    return nameMatch || flavorMatch;
+  });
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md animate-fade-in flex flex-col">
+    <div className="fixed inset-0 z-100 bg-black/80 backdrop-blur-md animate-fade-in flex flex-col">
       <div className="p-6 md:p-10 flex justify-end">
         <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
           <X size={32} />
@@ -38,21 +44,40 @@ export default function SearchOverlay({ isOpen, onClose, products, onViewProduct
           )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {searchTerm.length > 0 && results.map((product, idx) => (
-              <div 
-                key={`${product.id}-${idx}`} 
-                onClick={() => { onClose(); onViewProduct(product); }}
-                className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl cursor-pointer hover:bg-white/10 transition-colors border border-white/5 hover:border-phoenix-gold/30"
-              >
-                <div className="w-16 h-16 bg-black rounded-xl overflow-hidden flex items-center justify-center border border-white/10">
-                  <span className="text-2xl">{product.image}</span>
+            {searchTerm.length > 0 && results.map((product, idx) => {
+              
+              // Extraer la primera imagen de forma segura
+              let displayImage = '';
+              if (Array.isArray(product.image_url) && product.image_url.length > 0) {
+                displayImage = product.image_url[0];
+              } else if (typeof product.image_url === 'string') {
+                displayImage = product.image_url;
+              }
+
+              return (
+                <div 
+                  key={`${product.id}-${idx}`} 
+                  onClick={() => { onClose(); onViewProduct(product); }}
+                  className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl cursor-pointer hover:bg-white/10 transition-colors border border-white/5 hover:border-phoenix-gold/30"
+                >
+                  <div className="w-16 h-16 bg-black rounded-xl overflow-hidden flex items-center justify-center border border-white/10">
+                    {displayImage ? (
+                       <img src={displayImage} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                       <span className="text-white/20 text-[10px] uppercase">Sin imagen</span>
+                    )}
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <h4 className="text-white font-bold truncate">{product.name}</h4>
+                    <p className="text-phoenix-gold text-xs uppercase tracking-widest truncate mt-1">
+                      {product.flavors && product.flavors.length > 0 
+                        ? `${product.flavors.length} Sabores` 
+                        : 'Disponible'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-white font-bold">{product.name}</h4>
-                  <p className="text-phoenix-gold text-xs uppercase tracking-widest">{product.flavor}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
